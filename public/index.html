@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Share Bot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: monospace;
+        }
+
+        .button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .button-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .key-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .key-display {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px dashed #667eea;
+            margin-top: 10px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .status-box {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .admin-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .admin-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .admin-link a:hover {
+            text-decoration: underline;
+        }
+
+        .log-item {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .log-item.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .log-item.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .log-container {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Facebook Share Bot</h1>
+        <p class="subtitle">Automated Facebook Post Sharing System</p>
+
+        <!-- Key Authentication Section -->
+        <div class="section key-section" id="keySection">
+            <h2 class="section-title">🔑 Authentication</h2>
+            
+            <div class="input-group">
+                <label for="authKey">Enter Your Access Key:</label>
+                <input type="text" id="authKey" placeholder="Enter your authentication key">
+                <button class="button button-primary" onclick="validateKey()">Validate Key</button>
+                <button class="button button-secondary" onclick="generateKey()">Generate New Key</button>
+            </div>
+
+            <div id="generatedKeyDisplay" style="display: none;">
+                <p><strong>Your Generated Key:</strong></p>
+                <div class="key-display" id="generatedKey"></div>
+                <div class="info-box">
+                    <strong>⚠️ Important:</strong>
+                    Save this key! You need admin approval before using it. Contact the administrator to approve your key.
+                </div>
+            </div>
+
+            <div id="keyInfo" style="display: none;"></div>
+        </div>
+
+        <!-- Share Bot Section -->
+        <div class="section" id="shareBotSection" style="display: none;">
+            <h2 class="section-title">📤 Share Configuration</h2>
+
+            <div class="input-group">
+                <label for="postId">Facebook Post ID:</label>
+                <input type="text" id="postId" placeholder="Enter post ID (e.g., 123456789)">
+            </div>
+
+            <div class="input-group">
+                <label for="tokens">Access Tokens (one per line):</label>
+                <textarea id="tokens" placeholder="Paste your Facebook access tokens here, one per line"></textarea>
+            </div>
+
+            <div class="input-group">
+                <label for="shareCount">Shares per Token:</label>
+                <input type="number" id="shareCount" value="1" min="1" max="1000">
+            </div>
+
+            <button class="button button-primary" onclick="startSharing()" id="shareButton">
+                Start Sharing
+            </button>
+
+            <div class="status-box" id="statusBox" style="display: none;">
+                <h3>📊 Sharing Progress</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar">0%</div>
+                </div>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="successCount">0</div>
+                        <div class="stat-label">Successful</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="errorCount">0</div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalCount">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="globalShares">0</div>
+                        <div class="stat-label">Global Shares</div>
+                    </div>
+                </div>
+                <div class="log-container" id="logContainer"></div>
+            </div>
+        </div>
+
+        <div class="admin-link">
+            <a href="/admin">🔧 Admin Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        let currentKey = null;
+
+        async function generateKey() {
+            try {
+                const response = await fetch('/api/generate-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.key) {
+                    document.getElementById('generatedKey').textContent = data.key;
+                    document.getElementById('generatedKeyDisplay').style.display = 'block';
+                    document.getElementById('authKey').value = data.key;
+                    showMessage('Key generated successfully! Please contact admin for approval.', 'success');
+                }
+            } catch (error) {
+                showMessage('Failed to generate key: ' + error.message, 'error');
+            }
+        }
+
+        async function validateKey() {
+            const key = document.getElementById('authKey').value.trim();
+            
+            if (!key) {
+                showMessage('Please enter a key', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/validate-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ key: key })
+                });
+
+                const data = await response.json();
+
+                if (data.valid) {
+                    currentKey = key;
+                    showMessage('Key validated successfully!', 'success');
+                    document.getElementById('shareBotSection').style.display = 'block';
+                    loadKeyInfo();
+                } else {
+                    showMessage(data.message, 'error');
+                    document.getElementById('shareBotSection').style.display = 'none';
+                }
+            } catch (error) {
+                showMessage('Failed to validate key: ' + error.message, 'error');
+            }
+        }
+
+        async function loadKeyInfo() {
+            try {
+                const response = await fetch('/api/key-info');
+                const data = await response.json();
+
+                const infoHtml = `
+                    <div class="info-box">
+                        <strong>📋 Key Information:</strong>
+                        <p>Status: ${data.status}</p>
+                        <p>Created: ${data.created_at}</p>
+                        <p>Expires: ${data.expiry}</p>
+                        <p>Time Remaining: ${data.remaining}</p>
+                        <p>Your Shares: ${data.share_count}</p>
+                        <p>Global Shares: ${data.global_shares}</p>
+                    </div>
+                `;
+                
+                document.getElementById('keyInfo').innerHTML = infoHtml;
+                document.getElementById('keyInfo').style.display = 'block';
+            } catch (error) {
+                console.error('Failed to load key info:', error);
+            }
+        }
+
+        async function startSharing() {
+            const postId = document.getElementById('postId').value.trim();
+            const tokensText = document.getElementById('tokens').value.trim();
+            const shareCount = parseInt(document.getElementById('shareCount').value);
+
+            if (!postId || !tokensText) {
+                showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            const tokens = tokensText.split('\n').filter(t => t.trim());
+
+            if (tokens.length === 0) {
+                showMessage('Please provide at least one token', 'error');
+                return;
+            }
+
+            const shareButton = document.getElementById('shareButton');
+            shareButton.disabled = true;
+            shareButton.textContent = 'Sharing...';
+
+            document.getElementById('statusBox').style.display = 'block';
+            document.getElementById('logContainer').innerHTML = '';
+
+            try {
+                const response = await fetch('/api/share', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        post_id: postId,
+                        tokens: tokens,
+                        share_count: shareCount
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('successCount').textContent = data.success_count;
+                    document.getElementById('errorCount').textContent = data.error_count;
+                    document.getElementById('totalCount').textContent = data.total_attempts;
+                    document.getElementById('globalShares').textContent = data.global_share_count;
+                    document.getElementById('progressBar').style.width = data.progress_percentage + '%';
+                    document.getElementById('progressBar').textContent = data.progress_percentage + '%';
+
+                    // Display logs
+                    const logContainer = document.getElementById('logContainer');
+                    data.status_updates.forEach(update => {
+                        const logItem = document.createElement('div');
+                        logItem.className = `log-item ${update.status}`;
+                        logItem.textContent = update.message;
+                        logContainer.appendChild(logItem);
+                    });
+
+                    showMessage(`Sharing completed! ${data.success_count} successful, ${data.error_count}
