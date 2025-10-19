@@ -282,21 +282,38 @@ app.get('/api/admin/keys', (req, res) => {
 });
 
 app.post('/api/generate-key', (req, res) => {
-    const keyManager = new KeyManager();
-    const key = keyManager.generateKey();
-    res.json({ key: key });
+    try {
+        const keyManager = new KeyManager();
+        const key = keyManager.generateKey();
+        console.log('Generated key:', key);
+        res.json({ key: key });
+    } catch (error) {
+        console.error('Error generating key:', error);
+        res.status(500).json({ error: 'Failed to generate key: ' + error.message });
+    }
 });
 
 app.post('/api/validate-key', (req, res) => {
-    const key = req.body.key;
-    const keyManager = new KeyManager();
-    const result = keyManager.validateKey(key);
+    try {
+        const key = req.body.key;
+        
+        if (!key) {
+            return res.status(400).json({ valid: false, message: 'No key provided' });
+        }
+        
+        const keyManager = new KeyManager();
+        const result = keyManager.validateKey(key);
 
-    if (result.valid) {
-        req.session.key = key;
+        if (result.valid) {
+            req.session.key = key;
+        }
+
+        console.log('Validation result for key:', key, result);
+        res.json({ valid: result.valid, message: result.message });
+    } catch (error) {
+        console.error('Error validating key:', error);
+        res.status(500).json({ valid: false, message: 'Server error: ' + error.message });
     }
-
-    res.json({ valid: result.valid, message: result.message });
 });
 
 app.post('/api/approve-key', (req, res) => {
