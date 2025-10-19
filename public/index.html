@@ -364,8 +364,13 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    body: JSON.stringify({})
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
 
                 const data = await response.json();
                 
@@ -374,8 +379,13 @@
                     document.getElementById('generatedKeyDisplay').style.display = 'block';
                     document.getElementById('authKey').value = data.key;
                     showMessage('Key generated successfully! Please contact admin for approval.', 'success');
+                } else if (data.error) {
+                    showMessage('Error: ' + data.error, 'error');
+                } else {
+                    showMessage('Failed to generate key. Please try again.', 'error');
                 }
             } catch (error) {
+                console.error('Generate key error:', error);
                 showMessage('Failed to generate key: ' + error.message, 'error');
             }
         }
@@ -397,6 +407,10 @@
                     body: JSON.stringify({ key: key })
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
 
                 if (data.valid) {
@@ -405,10 +419,11 @@
                     document.getElementById('shareBotSection').style.display = 'block';
                     loadKeyInfo();
                 } else {
-                    showMessage(data.message, 'error');
+                    showMessage(data.message || 'Invalid key', 'error');
                     document.getElementById('shareBotSection').style.display = 'none';
                 }
             } catch (error) {
+                console.error('Validate key error:', error);
                 showMessage('Failed to validate key: ' + error.message, 'error');
             }
         }
@@ -416,17 +431,23 @@
         async function loadKeyInfo() {
             try {
                 const response = await fetch('/api/key-info');
+                
+                if (!response.ok) {
+                    console.error('Failed to load key info');
+                    return;
+                }
+                
                 const data = await response.json();
 
                 const infoHtml = `
                     <div class="info-box">
                         <strong>📋 Key Information:</strong>
-                        <p>Status: ${data.status}</p>
-                        <p>Created: ${data.created_at}</p>
-                        <p>Expires: ${data.expiry}</p>
-                        <p>Time Remaining: ${data.remaining}</p>
-                        <p>Your Shares: ${data.share_count}</p>
-                        <p>Global Shares: ${data.global_shares}</p>
+                        <p>Status: ${data.status || 'Unknown'}</p>
+                        <p>Created: ${data.created_at || 'N/A'}</p>
+                        <p>Expires: ${data.expiry || 'N/A'}</p>
+                        <p>Time Remaining: ${data.remaining || 'N/A'}</p>
+                        <p>Your Shares: ${data.share_count || 0}</p>
+                        <p>Global Shares: ${data.global_shares || 0}</p>
                     </div>
                 `;
                 
@@ -493,4 +514,36 @@
                         logContainer.appendChild(logItem);
                     });
 
-                    showMessage(`Sharing completed! ${data.success_count} successful, ${data.error_count}
+                    showMessage(`Sharing completed! ${data.success_count} successful, ${data.error_count} failed`, 'success');
+                    loadKeyInfo();
+                } else {
+                    showMessage(data.error || 'Sharing failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Error during sharing: ' + error.message, 'error');
+            } finally {
+                shareButton.disabled = false;
+                shareButton.textContent = 'Start Sharing';
+            }
+        }
+
+        function showMessage(message, type) {
+            const existingMessage = document.querySelector('.message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type} show`;
+            messageDiv.textContent = message;
+            
+            document.querySelector('.container').appendChild(messageDiv);
+
+            setTimeout(() => {
+                messageDiv.classList.remove('show');
+                setTimeout(() => messageDiv.remove(), 300);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
